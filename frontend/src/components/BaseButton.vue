@@ -9,7 +9,7 @@ defineProps<{
   <button
     :type="type || 'button'"
     :disabled="loading"
-    class="w-full relative overflow-hidden group px-6 py-3 bg-blue-600 text-white font-semibold rounded-xl transition-all duration-300 transform active:scale-[0.98] disabled:opacity-70 disabled:cursor-not-allowed shadow-lg shadow-primary-600/20 hover:shadow-primary-600/40"
+    class="w-full relative overflow-hidden group px-6 py-3 bg-blue-600 text-white font-semibold rounded-xl transition-all duration-300 transform active:scale-[0.98] disabled:opacity-70 disabled:cursor-not-allowed hover:shadow-primary-600/40"
   >
     <div
       class="absolute inset-0 w-3 bg-white/20 transition-all duration-500 -skew-x-12 -translate-x-10 group-hover:translate-x-[400px]"

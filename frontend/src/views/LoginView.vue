@@ -1,10 +1,12 @@
 <script setup lang="ts">
 import { ref } from 'vue'
+import { useRouter } from 'vue-router'
 import BaseInput from '@/components/BaseInput.vue'
 import BaseButton from '@/components/BaseButton.vue'
 import leafLogo from '@/assets/leaf-svgrepo-com.svg'
 import { supabase } from '@/lib/supabaseClient'
 
+const router = useRouter()
 const email = ref('')
 const password = ref('')
 const loading = ref(false)
@@ -44,9 +46,9 @@ const handleLogin = async () => {
 
     if (data.session) {
       // Supabase handles session storage in localStorage automatically
-      alert('Login realizado com sucesso!')
-      // Here you would typically redirect to the dashboard
-      // router.push('/dashboard');
+      alert('Login realizado com sucesso! Redirecionando...')
+      router.push({ name: 'home' })
+      return
     }
   } catch (error) {
     console.error('Login error:', error)
