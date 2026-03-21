@@ -65,17 +65,17 @@ const statsVars = [
           <a
             class="text-primary font-bold text-sm font-headline tracking-tight hover:opacity-70 transition-opacity"
             href="#"
-            >Platform</a
+            >Plataforma</a
           >
           <a
             class="text-secondary font-medium text-sm hover:text-primary transition-colors duration-300 font-headline tracking-tight"
             href="#"
-            >Care Solutions</a
+            >Soluções</a
           >
           <a
             class="text-secondary font-medium text-sm hover:text-primary transition-colors duration-300 font-headline tracking-tight"
             href="#"
-            >Network</a
+            >Sobre</a
           >
         </div>
         <div class="flex items-center ml-4 gap-4">
@@ -102,16 +102,15 @@ const statsVars = [
             <span
               class="inline-block px-4 py-1.5 rounded-full bg-secondary-container text-primary font-semibold text-xs tracking-widest uppercase mb-8"
             >
-              The Digital Sanctuary
+              Vocë encontrou o que precisava
             </span>
             <h1
               class="font-headline text-6xl lg:text-8xl font-extrabold text-teal-900 leading-[1.1] tracking-tighter mb-8 text-balance"
             >
-              The Future of <span class="text-primary">Care</span>, Today.
+              O futuro do <span class="text-primary">cuidado</span>, hoje.
             </h1>
             <p class="text-lg text-on-surface-variant font-light leading-relaxed mb-12 max-w-lg">
-              A minimalist, human-centered platform designed to pair your loved ones with
-              exceptional care providers in a serene, high-tech environment.
+              Uma plataforma desenvolvida centrada no bem-estar de quem você ama.
             </p>
             <!-- Hero CTAs -->
             <div class="flex flex-col sm:flex-row gap-4">
@@ -119,13 +118,13 @@ const statsVars = [
                 @click="goToChoice"
                 class="bg-primary text-on-primary px-10 py-4 rounded-full font-bold text-lg hover:shadow-xl hover:-translate-y-0.5 transition-all"
               >
-                Find Care
+                Quero cuidado
               </button>
               <button
                 @click="goToChoice"
                 class="px-10 py-4 bg-surface-container-low text-primary border border-primary/10 rounded-full font-bold text-lg hover:bg-surface-container transition-all"
               >
-                I'm a Carer
+                Quero cuidar
               </button>
             </div>
           </div>
@@ -150,16 +149,16 @@ const statsVars = [
           <div class="flex flex-col md:flex-row justify-between items-end mb-20 gap-8">
             <div class="max-w-2xl">
               <h2 class="font-headline text-4xl lg:text-5xl font-bold text-teal-900 mb-6">
-                Curating Human Connections through Insight.
+                Conectando pessoas através de cuidados.
               </h2>
               <p class="text-on-surface-variant font-light">
-                We reject the clutter of traditional healthcare systems to provide a breathable,
-                intuitive experience.
+                Nós rejeitamos a desordem dos sistemas de saúde tradicionais para fornecer uma
+                experiência respirável e intuitiva.
               </p>
             </div>
             <div class="hidden md:block">
               <a class="text-primary font-semibold flex items-center gap-2 group" href="#">
-                Explore our philosophy
+                Explore nossa filosofia
                 <span
                   class="material-symbols-outlined transition-transform group-hover:translate-x-1"
                   >arrow_forward</span
@@ -180,11 +179,11 @@ const statsVars = [
                   <span class="material-symbols-outlined text-primary text-3xl">favorite</span>
                 </div>
                 <h3 class="font-headline text-3xl font-bold text-teal-900 mb-4">
-                  Empathetic Matching
+                  Encontro de valores
                 </h3>
                 <p class="text-on-surface-variant leading-relaxed max-w-md">
-                  Our process focuses on emotional alignment and compatibility to ensure the carer
-                  and patient share a genuine bond.
+                  Nosso processo foca no alinhamento emocional e compatibilidade para garantir que o
+                  cuidador e o paciente compartilhem um vínculo genuíno.
                 </p>
               </div>
               <div class="mt-8 pt-8 border-t border-outline-variant/20">
@@ -223,16 +222,16 @@ const statsVars = [
                 >
                   <span class="material-symbols-outlined text-white text-3xl">verified_user</span>
                 </div>
-                <h3 class="font-headline text-3xl font-bold mb-4">Trusted Network</h3>
+                <h3 class="font-headline text-3xl font-bold mb-4">Rede de confiança</h3>
                 <p class="text-teal-100 font-light leading-relaxed">
-                  Vetted through a rigorous 7-stage verification process including background checks
-                  and specialized certifications.
+                  Os cuidadores são verificados através de um rigoroso processo interno na hora do
+                  cadastro.
                 </p>
               </div>
               <button
                 class="mt-8 w-fit px-8 py-3 border border-white/20 rounded-full hover:bg-white hover:text-teal-900 transition-colors font-bold text-sm"
               >
-                Verify a Carer
+                Verificar um cuidador
               </button>
             </div>
 
@@ -242,11 +241,11 @@ const statsVars = [
             >
               <div class="relative z-10 max-w-2xl">
                 <h3 class="font-headline text-3xl font-bold text-teal-900 mb-4">
-                  Personalized Care Plans
+                  Deixamos você planejar o seu cuidado
                 </h3>
                 <p class="text-on-secondary-container leading-relaxed mb-8">
-                  Dynamic scheduling and routine management that adapts in real-time to health
-                  markers and familial needs.
+                  Agendamento dinâmico e gerenciamento de rotina que se adapta em tempo real aos
+                  marcadores de saúde e necessidades familiares.
                 </p>
                 <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
                   <div
@@ -272,20 +271,20 @@ const statsVars = [
           <h2
             class="font-headline text-5xl lg:text-7xl font-extrabold text-teal-900 mb-12 tracking-tighter"
           >
-            Enter the Sanctuary.
+            Entre no Santuário.
           </h2>
           <div class="flex flex-col sm:flex-row items-center justify-center gap-6">
             <button
               @click="goToChoice"
               class="bg-primary text-on-primary px-12 py-5 rounded-full font-bold text-lg hover:shadow-xl transition-all"
             >
-              Register as a Family
+              Cadastre-se como família
             </button>
             <button
               @click="goToChoice"
               class="px-12 py-5 bg-surface-container-high text-teal-900 rounded-full font-bold text-lg hover:bg-surface-container-highest transition-all"
             >
-              Join the Network
+              Cadastre-se como cuidador
             </button>
           </div>
         </div>
@@ -298,21 +297,21 @@ const statsVars = [
         <div class="flex flex-col items-center md:items-start gap-3">
           <div class="text-2xl font-green text-primary font-headline">CuidarBem</div>
           <p class="text-slate-400 font-body text-xs tracking-widest uppercase font-semibold">
-            © 2024 CuidarBem. The Digital Sanctuary.
+            © 2026 CuidarBem. O Santuário Digital.
           </p>
         </div>
         <div class="flex flex-wrap justify-center gap-10">
           <a class="text-slate-500 hover:text-primary transition-all font-semibold text-sm" href="#"
-            >Privacy Policy</a
+            >Política de Privacidade</a
           >
           <a class="text-slate-500 hover:text-primary transition-all font-semibold text-sm" href="#"
-            >Terms of Service</a
+            >Termos de Uso</a
           >
           <a class="text-slate-500 hover:text-primary transition-all font-semibold text-sm" href="#"
-            >Ethical Standards</a
+            >Padrões Éticos</a
           >
           <a class="text-slate-500 hover:text-primary transition-all font-semibold text-sm" href="#"
-            >Contact</a
+            >Contato</a
           >
         </div>
       </div>
