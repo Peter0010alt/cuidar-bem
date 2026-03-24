@@ -42,7 +42,7 @@ const handleLogin = async () => {
     }
 
     if (data.session) {
-      alert('Login realizado com sucesso! Redirecionando...')
+      //alert('Login realizado com sucesso! Redirecionando...')
       router.push({ name: 'home' })
       return
     }
@@ -181,7 +181,7 @@ const handleLogin = async () => {
           <p class="text-on-surface-variant font-medium text-sm">
             Não tem uma conta?
             <RouterLink
-              to="/forms-page"
+              to="/register"
               class="font-bold text-primary hover:text-teal-900 transition-colors ml-1"
               >Crie agora</RouterLink
             >
