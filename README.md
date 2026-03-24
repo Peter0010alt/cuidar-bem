@@ -1,46 +1,93 @@
 # 👵 CuidarBem
 
 <p align="center">
-<img src="https://img.shields.io/badge/Vue.js-35495E?style=for-the-badge&logo=vuedotjs&logoColor=4FC08D" alt="Vue.js">
-<img src="https://img.shields.io/badge/Tailwind_CSS-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white" alt="Tailwind">
-<img src="https://img.shields.io/badge/Node.js-339933?style=for-the-badge&logo=nodedotjs&logoColor=white" alt="Node.js">
-<img src="https://img.shields.io/badge/Express.js-000000?style=for-the-badge&logo=express&logoColor=white" alt="Express.js">
-<img src="https://img.shields.io/badge/PostgreSQL-336791?style=for-the-badge&logo=postgresql&logoColor=white" alt="PostgreSQL">
+  <img src="frontend/src/assets/logo.svg" alt="CuidarBem Logo" width="120" />
 </p>
 
-Conectando idosos e cuidadores com base em afinidade, disponibilidade e valores.
+<p align="center">
+  <a href="https://vuejs.org/"><img src="https://img.shields.io/badge/Vue.js-4FC08D?style=for-the-badge&logo=vuedotjs&logoColor=white" alt="Vue.js"></a>
+  <a href="https://vitejs.dev/"><img src="https://img.shields.io/badge/Vite-646CFF?style=for-the-badge&logo=vite&logoColor=white" alt="Vite"></a>
+  <a href="https://tailwindcss.com/"><img src="https://img.shields.io/badge/Tailwind_CSS-06B6D4?style=for-the-badge&logo=tailwind-css&logoColor=white" alt="Tailwind CSS"></a>
+  <a href="https://supabase.com/"><img src="https://img.shields.io/badge/Supabase-3ECF8E?style=for-the-badge&logo=supabase&logoColor=white" alt="Supabase"></a>
+  <a href="https://nodejs.org/"><img src="https://img.shields.io/badge/Node.js-339933?style=for-the-badge&logo=nodedotjs&logoColor=white" alt="Node.js"></a>
+  <a href="https://expressjs.com/"><img src="https://img.shields.io/badge/Express.js-000000?style=for-the-badge&logo=express&logoColor=white" alt="Express.js"></a>
+</p>
 
-O **CuidarBem** é uma plataforma desenvolvida para facilitar o encontro entre idosos (ou seus familiares) e profissionais de cuidado. Através de um sistema de matches inteligente, a aplicação filtra preferências de datas, turnos, valores e especialidades para garantir que ambos os lados encontrem a melhor parceria possível.
+---
 
-## 🚀 Tecnologias Utilizadas
+## 📖 Sobre o Projeto
 
-O projeto utiliza uma stack moderna para garantir performance e uma interface amigável (UX):
+O **CuidarBem** é uma plataforma inovadora dedicada a conectar idosos e seus familiares com cuidadores profissionais. Nosso objetivo é simplificar a busca por cuidados de qualidade, utilizando um sistema de match inteligente baseado em afinidade, disponibilidade e valores.
 
-**Frontend**
+---
 
-Vue.js 3: Framework progressivo para construção da interface.
+## 🛠️ Tecnologias e Ferramentas
 
-Tailwind CSS: Framework CSS utilitário para um design responsivo e limpo.
+### Frontend
 
-Vue Router: Gerenciamento de rotas da aplicação.
+- **Framework:** [Vue 3](https://vuejs.org/) (Composition API)
+- **Tooling:** [Vite](https://vitejs.dev/)
+- **Estilização:** [Tailwind CSS 4](https://tailwindcss.com/)
+- **Gerenciamento de Estado:** [Pinia](https://pinia.vuejs.org/)
+- **Roteamento:** [Vue Router](https://router.vuejs.org/)
+- **Linguagem:** [TypeScript](https://www.typescriptlang.org/)
 
-Axios: Cliente HTTP para comunicação com a API.
+### Backend
 
-**Backend**
-Node.js: Ambiente de execução JavaScript.
+- **Ambiente:** [Node.js](https://nodejs.org/)
+- **Framework:** [Express.js](https://expressjs.com/)
+- **Banco de Dados & Auth:** [Supabase](https://supabase.com/)
+- **Autenticação:** JWT & Bcryptjs
 
-Express.js: Framework minimalista para a construção da API.
+### Qualidade e Testes
 
-## ✨ Funcionalidades
+- **Testes Unitários:** [Vitest](https://vitest.dev/)
+- **Testes E2E:** [Playwright](https://playwright.dev/)
+- **Linting & Formatação:** [ESLint](https://eslint.org/), [Oxlint](https://oxlint.dev/), [Prettier](https://prettier.io/)
 
-👤 Cadastro de Perfis: Perfis distintos e personalizados para Idosos/Familiares e Cuidadores.
+---
 
-🤝 Sistema de Match: Algoritmo que cruza dados de disponibilidade (datas/horários) e pretensão salarial.
+## 🚀 Como Executar o Projeto
 
-🔍 Filtros Avançados: Busca por qualificações específicas, especialidades ou localização.
+### Pré-requisitos
 
-📊 Painel de Controle: Dashboard para visualização rápida de agendamentos e propostas pendentes.
+- Node.js (v20.19.0 ou superior)
+- npm ou yarn
+
+### 1. Clone o repositório
+
+```bash
+git clone https://github.com/Peter0010alt/cuidar-bem.git
+cd cuidar-bem
+```
+
+### 2. Configuração do Backend
+
+```bash
+cd backend
+npm install
+# Crie um arquivo .env com suas credenciais do Supabase
+npm run dev
+```
+
+### 3. Configuração do Frontend
+
+```bash
+cd ../frontend
+npm install
+npm run dev
+```
+
+A aplicação estará disponível em `http://localhost:5173`.
+
+---
+
+## 📄 Licença
+
+Este projeto está sob a licença **MIT**. Veja o arquivo [LICENSE](LICENSE) para mais detalhes.
+
+---
 
 <p align="center">
-Desenvolvido por <strong>Pedro Nelson e Pedro Ernesto</strong>
+Desenvolvido com ❤️ por <strong>Pedro Nelson e Pedro Ernesto</strong>
 </p>
