@@ -15,14 +15,14 @@ const userName = computed(() => {
 const loadSession = async () => {
   const { data } = await supabase.auth.getSession()
   if (!data.session) {
-    router.replace({ name: 'login' })
+    user.value = null
     return
   }
   user.value = data.session.user
 }
 
-const goToChoice = () => {
-  router.push({ name: 'choice' })
+const goTo = (routeName: string) => {
+  router.push({ name: routeName })
 }
 
 const handleSignOut = async () => {
@@ -62,10 +62,10 @@ const statsVars = [
         </div>
         <!-- Navigation Links -->
         <div class="hidden md:flex items-center gap-6">
-          <a
+          <RouterLink
             class="text-primary font-bold text-sm font-headline tracking-tight hover:opacity-70 transition-opacity"
-            href="#"
-            >Plataforma</a
+            :to="{ name: 'home' }"
+            >Plataforma</RouterLink
           >
           <a
             class="text-secondary font-medium text-sm hover:text-primary transition-colors duration-300 font-headline tracking-tight"
@@ -79,16 +79,26 @@ const statsVars = [
           >
         </div>
         <div class="flex items-center ml-4 gap-4">
-          <span class="hidden md:block text-sm font-medium text-secondary"
-            >Olá, {{ userName }}</span
-          >
-          <button
-            @click="handleSignOut"
-            :disabled="loading"
-            class="bg-primary text-white py-2 rounded-full text-sm font-bold shadow-sm hover:bg-primary-container transition-all active:scale-95 px-6 disabled:opacity-50"
-          >
-            {{ loading ? 'Saindo...' : 'Sair' }}
-          </button>
+          <template v-if="user">
+            <span class="hidden md:block text-sm font-medium text-secondary"
+              >Olá, {{ userName }}</span
+            >
+            <button
+              @click="handleSignOut"
+              :disabled="loading"
+              class="bg-primary text-white py-2 rounded-full text-sm font-bold shadow-sm hover:bg-primary-container transition-all active:scale-95 px-6 disabled:opacity-50"
+            >
+              {{ loading ? 'Saindo...' : 'Sair' }}
+            </button>
+          </template>
+          <template v-else>
+            <button
+              @click="goTo('login')"
+              class="bg-primary text-white py-2 rounded-full text-sm font-bold shadow-sm hover:bg-primary-container transition-all active:scale-95 px-6"
+            >
+              Entrar
+            </button>
+          </template>
         </div>
       </div>
     </nav>
@@ -110,18 +120,18 @@ const statsVars = [
               O futuro do <span class="text-primary">cuidado</span>, hoje.
             </h1>
             <p class="text-lg text-on-surface-variant font-light leading-relaxed mb-12 max-w-lg">
-              Uma plataforma desenvolvida centrada no bem-estar de quem você ama.
+              Plataforma que conecta cuidadores e pessoas que precisam de cuidados.
             </p>
             <!-- Hero CTAs -->
             <div class="flex flex-col sm:flex-row gap-4">
               <button
-                @click="goToChoice"
+                @click="goTo('found-caregiver')"
                 class="bg-primary text-on-primary px-10 py-4 rounded-full font-bold text-lg hover:shadow-xl hover:-translate-y-0.5 transition-all"
               >
                 Quero cuidado
               </button>
               <button
-                @click="goToChoice"
+                @click="goTo('forms-page')"
                 class="px-10 py-4 bg-surface-container-low text-primary border border-primary/10 rounded-full font-bold text-lg hover:bg-surface-container transition-all"
               >
                 Quero cuidar
@@ -275,13 +285,13 @@ const statsVars = [
           </h2>
           <div class="flex flex-col sm:flex-row items-center justify-center gap-6">
             <button
-              @click="goToChoice"
+              @click="goTo('found-caregiver')"
               class="bg-primary text-on-primary px-12 py-5 rounded-full font-bold text-lg hover:shadow-xl transition-all"
             >
               Cadastre-se como família
             </button>
             <button
-              @click="goToChoice"
+              @click="goTo('forms-page')"
               class="px-12 py-5 bg-surface-container-high text-teal-900 rounded-full font-bold text-lg hover:bg-surface-container-highest transition-all"
             >
               Cadastre-se como cuidador
