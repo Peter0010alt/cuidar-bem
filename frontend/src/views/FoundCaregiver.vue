@@ -1,78 +1,94 @@
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
+import { supabase } from '@/lib/supabaseClient'
 
 const router = useRouter()
-
 const searchQuery = ref('')
+const loading = ref(true)
 
-const profiles = ref([
-  {
-    id: 1,
-    name: 'Maria Silva',
-    age: 45,
-    gender: 'Feminino',
-    price: 'R$ 150/dia',
-    experience: '5 anos',
-    bgClass: 'bg-primary-fixed',
-    textClass: 'text-on-primary-fixed',
-  },
-  {
-    id: 2,
-    name: 'João Santos',
-    age: 50,
-    gender: 'Masculino',
-    price: 'R$ 130/dia',
-    experience: '8 anos',
-    bgClass: 'bg-secondary-fixed',
-    textClass: 'text-on-secondary-fixed',
-  },
-  {
-    id: 3,
-    name: 'Ana Costa',
-    age: 38,
-    gender: 'Feminino',
-    price: 'R$ 160/dia',
-    experience: '3 anos',
-    bgClass: 'bg-tertiary-fixed',
-    textClass: 'text-on-tertiary-fixed',
-  },
-  {
-    id: 4,
-    name: 'Carlos Oliveira',
-    age: 42,
-    gender: 'Masculino',
-    price: 'R$ 140/dia',
-    experience: '6 anos',
-    bgClass: 'bg-primary-fixed',
-    textClass: 'text-on-primary-fixed',
-  },
-  {
-    id: 5,
-    name: 'Fernanda Lima',
-    age: 35,
-    gender: 'Feminino',
-    price: 'R$ 120/dia',
-    experience: '2 anos',
-    bgClass: 'bg-error-container',
-    textClass: 'text-on-error-container',
-  },
-  {
-    id: 6,
-    name: 'Roberto Almeida',
-    age: 48,
-    gender: 'Masculino',
-    price: 'R$ 180/dia',
-    experience: '10 anos',
-    bgClass: 'bg-secondary-fixed',
-    textClass: 'text-on-secondary-fixed',
-  },
-])
+interface CarerProfile {
+  id: string
+  name: string
+  age: number
+  gender: string
+  price: string
+  experience: string
+  bio: string
+  specialty: string
+  avatarUrl: string | null
+  bgClass: string
+  textClass: string
+}
+
+const profiles = ref<CarerProfile[]>([])
+
+const fetchProfiles = async () => {
+  loading.value = true
+  try {
+    const { data, error } = await supabase
+      .from('carers')
+      .select('*')
+      .order('created_at', { ascending: false })
+
+    if (error) {
+      console.error('FoundCaregiver fetch error:', error)
+      throw error
+    }
+    
+    console.log('Fetched carers data:', data)
+    if (data && data.length === 0) {
+      console.warn('No carers found. Check RLS SELECT policies on the "carers" table!')
+    }
+
+    if (data) {
+      const bgClasses = [
+        'bg-primary-fixed',
+        'bg-secondary-fixed',
+        'bg-tertiary-fixed',
+        'bg-error-container',
+      ]
+      const textClasses = [
+        'text-on-primary-fixed',
+        'text-on-secondary-fixed',
+        'text-on-tertiary-fixed',
+        'text-on-error-container',
+      ]
+
+      profiles.value = data.map(
+        (p, index) =>
+          ({
+            id: p.id,
+            name: p.full_name,
+            age: p.age,
+            gender: p.gender,
+            price: `R$ ${p.price}/dia`,
+            experience: p.experience,
+            bio: p.bio,
+            specialty: p.specialty,
+            avatarUrl: p.avatar_url || null,
+            bgClass: bgClasses[index % 4],
+            textClass: textClasses[index % 4],
+          } as CarerProfile)
+      )
+      console.log('Mapped profiles for display:', profiles.value.map(p => ({ name: p.name, hasAvatar: !!p.avatarUrl, url: p.avatarUrl })))
+    }
+  } catch (error) {
+    console.error('Error fetching profiles:', error)
+  } finally {
+    loading.value = false
+  }
+}
+
+onMounted(fetchProfiles)
 
 const filteredProfiles = computed(() => {
   if (!searchQuery.value) return profiles.value
   const query = searchQuery.value.toLowerCase()
-  return profiles.value.filter((p) => p.name.toLowerCase().includes(query))
+  return profiles.value.filter((p) => 
+    p.name.toLowerCase().includes(query) || 
+    p.specialty.toLowerCase().includes(query)
+  )
 })
 
 const goBack = () => {
@@ -167,6 +183,18 @@ const goBack = () => {
           <!-- Avatar -->
           <div class="flex items-center gap-6 mb-8 relative z-10">
             <div
+              v-if="profile.avatarUrl"
+              class="w-20 h-20 rounded-2xl overflow-hidden flex-shrink-0 shadow-sm"
+            >
+              <img 
+                :src="profile.avatarUrl" 
+                :alt="profile.name" 
+                class="w-full h-full object-cover"
+                @error="profile.avatarUrl = null" 
+              />
+            </div>
+            <div
+              v-else
               class="w-20 h-20 rounded-2xl flex items-center justify-center text-2xl font-extrabold shadow-sm flex-shrink-0"
               :class="[profile.bgClass, profile.textClass]"
             >

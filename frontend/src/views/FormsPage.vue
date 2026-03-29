@@ -1,68 +1,496 @@
+<script setup lang="ts">
+import { ref, onMounted, computed } from 'vue'
+import { useRouter } from 'vue-router'
+import { supabase } from '@/lib/supabaseClient'
+
+const router = useRouter()
+const submitLoading = ref(false)
+const signOutLoading = ref(false)
+const userId = ref<string | null>(null)
+const userEmail = ref<string | null>(null)
+const avatarFile = ref<File | null>(null)
+const avatarPreview = ref<string | null>(null)
+
+const userName = computed(() => {
+  if (!userEmail.value) return 'Usuário'
+  return userEmail.value.split('@')[0]
+})
+
+const form = ref({
+  fullName: '',
+  gender: '',
+  age: '',
+  phone: '',
+  specialty: '',
+  experience: '',
+  bio: '',
+  avatarUrl: '' as string,
+})
+
+const specialties = [
+  'Idosos',
+  'Pós-operatório',
+  'Alzheimer / Demência',
+  'Crianças / PCD',
+  'Cuidados Paliativos',
+]
+
+const handleSignOut = async () => {
+  signOutLoading.value = true
+  await supabase.auth.signOut()
+  router.replace({ name: 'login' })
+}
+
+onMounted(async () => {
+  // getUser() validates the token server-side — required for RLS to work correctly
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+  if (!user) {
+    router.push({ name: 'login' })
+    return
+  }
+  userId.value = user.id
+  userEmail.value = user.email ?? null
+
+  // Pre-fill if profile already exists
+  const { data: carer } = await supabase.from('carers').select('*').eq('id', userId.value).single()
+
+  if (carer) {
+    form.value = {
+      fullName: carer.full_name || '',
+      gender: carer.gender || '',
+      age: carer.age?.toString() || '',
+      phone: carer.phone || '',
+      specialty: carer.specialty || '',
+      experience: carer.experience || '',
+      bio: carer.bio || '',
+      avatarUrl: carer.avatar_url || '',
+    }
+    if (carer.avatar_url) avatarPreview.value = carer.avatar_url
+  }
+})
+
+const handleAvatarChange = (event: Event) => {
+  const input = event.target as HTMLInputElement
+  const file = input.files?.[0]
+  if (!file) return
+  avatarFile.value = file
+  avatarPreview.value = URL.createObjectURL(file)
+}
+
+const handleSubmit = async () => {
+  if (!userId.value) {
+    console.error('Submit attempted without userId')
+    return
+  }
+
+  console.log('Starting handleSubmit for user:', userId.value)
+  submitLoading.value = true
+  try {
+    const { data: authUser } = await supabase.auth.getUser()
+    if (!authUser.user) {
+      throw new Error('User not authenticated')
+    }
+    console.log('Authenticated user confirmed:', authUser.user.id)
+
+    let avatarUrl = form.value.avatarUrl
+
+    const session = await supabase.auth.getSession()
+    console.log('Token ativo:', session.data.session?.access_token ? 'Sim' : 'Não')
+
+    // Upload new avatar if one was selected
+    if (avatarFile.value && userId.value) {
+      const ext = avatarFile.value.name.split('.').pop()
+      const path = `${userId.value}/${userId.value}.${ext}`
+      console.log('Uploading image to path:', path)
+      const { error: uploadError } = await supabase.storage
+        .from('avatars')
+        .upload(path, avatarFile.value, { upsert: true })
+      if (uploadError) throw uploadError
+      
+      const { data: urlData } = supabase.storage.from('avatars').getPublicUrl(path)
+      avatarUrl = urlData.publicUrl
+      console.log('Image uploaded successfully. Public URL:', avatarUrl)
+    }
+
+    const payload = {
+      id: userId.value,
+      full_name: form.value.fullName,
+      gender: form.value.gender,
+      age: parseInt(form.value.age),
+      phone: form.value.phone,
+      specialty: form.value.specialty,
+      experience: form.value.experience,
+      bio: form.value.bio,
+      avatar_url: avatarUrl || null,
+      updated_at: new Date().toISOString(),
+    }
+
+    console.log('Upserting payload:', payload)
+
+    // Using separate insert/update check to be safer with RLS
+    const { data: existing } = await supabase
+      .from('carers')
+      .select('id')
+      .eq('id', userId.value)
+      .single()
+
+    let error
+    if (existing) {
+      console.log('Profile exists, updating...')
+      const res = await fetch(`http://localhost:3000/api/carers/${userId.value}`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${session.data.session?.access_token}`,
+        },
+        body: JSON.stringify(payload),
+      })
+      if (!res.ok) {
+        const errData = await res.json()
+        error = new Error(errData.error || 'Falha ao atualizar o perfil')
+      }
+    } else {
+      console.log('No profile exists, inserting...')
+      const { error: insertError } = await supabase.from('carers').insert(payload)
+      error = insertError
+    }
+
+    if (error) {
+      console.error('Database operation failed:', error)
+      throw error
+    }
+
+    console.log('Profile saved successfully')
+    // Success — navigate to next step (price setup)
+    router.push({ name: 'profile' })
+  } catch (err: unknown) {
+    // PostgrestError has .message but is not instanceof Error
+    const message =
+      err instanceof Error
+        ? err.message
+        : ((err as { message?: string })?.message ?? 'Erro desconhecido')
+    console.error('Error saving profile (catch):', err)
+    alert('Erro ao salvar perfil: ' + message)
+  } finally {
+    submitLoading.value = false
+  }
+}
+</script>
+
 <template>
-  <div class="min-h-screen bg-background text-on-surface font-body selection:bg-primary-fixed selection:text-on-primary-fixed flex items-center justify-center p-6 py-16 relative overflow-hidden">
-    <!-- Optional Background Details -->
-    <div class="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-primary-fixed/20 via-background to-background pointer-events-none"></div>
-
-    <div class="w-full max-w-3xl bg-surface-container-lowest rounded-[3rem] shadow-2xl shadow-primary/5 border border-outline-variant/30 p-10 md:p-14 relative z-10">
-      <!-- Decorative element -->
-      <div class="absolute top-0 right-0 w-64 h-64 bg-secondary-fixed/30 rounded-full blur-[80px] pointer-events-none"></div>
-
-      <div class="text-center mb-12">
-        <span class="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-primary-fixed text-primary mb-6 shadow-sm">
-          <span class="material-symbols-outlined text-4xl">clinical_notes</span>
-        </span>
-        <h1 class="text-4xl md:text-5xl font-extrabold text-teal-900 font-headline tracking-tighter mb-4">Cadastro de Cuidador</h1>
-        <p class="text-lg text-on-surface-variant font-light">Preencha o formulário abaixo para fazer parte da nossa rede exclusiva de cuidadores.</p>
-      </div>
-
-      <form class="space-y-8 relative z-10">
-        <div class="space-y-2">
-          <label class="block text-sm font-bold text-teal-900 ml-1">Nome Completo</label>
-          <input type="text" class="block w-full px-5 py-4 bg-surface-container-low border border-outline-variant/30 rounded-2xl text-on-surface placeholder:text-outline focus:bg-white focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all outline-none font-medium shadow-inner" placeholder="Ex: Maria da Silva" />
+  <div
+    class="bg-background text-on-surface font-body min-h-screen flex flex-col selection:bg-secondary-container"
+  >
+    <!-- Floating TopNavBar (same as HomeView) -->
+    <nav class="fixed top-6 left-1/2 -translate-x-1/2 z-50 w-[95%] max-w-fit">
+      <div
+        class="floating-pill-nav rounded-full py-3.5 flex justify-between items-center shadow-lg shadow-black/5 px-6"
+      >
+        <div class="text-xl font-extrabold text-primary font-headline tracking-tight mr-4">
+          CuidarBem
         </div>
-        
-        <fieldset class="space-y-4 p-6 border border-outline-variant/30 rounded-3xl bg-surface-container-low/50 relative">
-          <legend class="text-sm font-bold text-teal-900 px-4 bg-surface-container-lowest rounded-full border border-outline-variant/30 ml-2 py-1 shadow-sm">Gênero</legend>
-          <div class="flex flex-wrap gap-8 pl-2">
-            <label class="inline-flex items-center gap-3 cursor-pointer group">
-              <input type="radio" name="sexo" value="feminino" class="w-5 h-5 text-primary border-outline-variant focus:ring-primary focus:ring-offset-surface-container-lowest cursor-pointer transition-all" />
-              <span class="text-on-surface-variant font-medium group-hover:text-teal-900 transition-colors">Feminino</span>
-            </label>
-            <label class="inline-flex items-center gap-3 cursor-pointer group">
-              <input type="radio" name="sexo" value="masculino" class="w-5 h-5 text-primary border-outline-variant focus:ring-primary focus:ring-offset-surface-container-lowest cursor-pointer transition-all" />
-              <span class="text-on-surface-variant font-medium group-hover:text-teal-900 transition-colors">Masculino</span>
-            </label>
-            <label class="inline-flex items-center gap-3 cursor-pointer group">
-              <input type="radio" name="sexo" value="outro" class="w-5 h-5 text-primary border-outline-variant focus:ring-primary focus:ring-offset-surface-container-lowest cursor-pointer transition-all" />
-              <span class="text-on-surface-variant font-medium group-hover:text-teal-900 transition-colors">Outro</span>
-            </label>
-          </div>
-        </fieldset>
-
-        <div class="space-y-2">
-          <label class="block text-sm font-bold text-teal-900 ml-1">Idade</label>
-          <input type="tel" class="block w-full px-5 py-4 bg-surface-container-low border border-outline-variant/30 rounded-2xl text-on-surface placeholder:text-outline focus:bg-white focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all outline-none font-medium shadow-inner" placeholder="Ex: 35" />
+        <div class="hidden md:flex items-center gap-6">
+          <RouterLink
+            class="text-primary font-bold text-sm font-headline tracking-tight hover:opacity-70 transition-opacity"
+            :to="{ name: 'home' }"
+            >Plataforma</RouterLink
+          >
+          <a
+            class="text-secondary font-medium text-sm hover:text-primary transition-colors duration-300 font-headline tracking-tight"
+            href="#"
+            >Soluções</a
+          >
+          <a
+            class="text-secondary font-medium text-sm hover:text-primary transition-colors duration-300 font-headline tracking-tight"
+            href="#"
+            >Sobre</a
+          >
         </div>
-
-        <div class="space-y-2">
-          <label class="block text-sm font-bold text-teal-900 ml-1">Cursos e experiências</label>
-          <textarea rows="4" class="block w-full px-5 py-4 bg-surface-container-low border border-outline-variant/30 rounded-3xl text-on-surface placeholder:text-outline focus:bg-white focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all outline-none font-medium resize-none shadow-inner" placeholder="Conte um pouco sobre os cursos que realizou e sua experiência..."></textarea>
-        </div>
-
-
-        <div class="pt-8 mt-10 border-t border-outline-variant/20 flex justify-end">
-          <button type="submit" class="w-full sm:w-auto px-10 py-4 bg-primary text-white rounded-full font-bold shadow-lg shadow-primary/20 hover:bg-primary-container hover:-translate-y-0.5 focus:outline-none focus:ring-4 focus:ring-primary/30 transition-all flex items-center justify-center gap-3">
-             <span>Enviar Cadastro</span>
-             <span class="material-symbols-outlined text-xl">arrow_forward</span>
+        <div class="flex items-center ml-4 gap-4">
+          <span class="hidden md:block text-sm font-medium text-secondary"
+            >Olá, {{ userName }}</span
+          >
+          <button
+            @click="handleSignOut"
+            :disabled="signOutLoading"
+            class="bg-primary text-white py-2 rounded-full text-sm font-bold shadow-sm hover:bg-primary-container transition-all active:scale-95 px-6 disabled:opacity-50"
+          >
+            {{ signOutLoading ? 'Saindo...' : 'Sair' }}
           </button>
         </div>
-      </form>
-    </div>
+      </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main
+      class="flex-grow pt-28 pb-24 px-6 relative overflow-hidden flex items-center justify-center"
+    >
+      <!-- Abstract Background -->
+      <div
+        class="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-primary/5 rounded-full blur-[120px]"
+      ></div>
+      <div
+        class="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-secondary-container/20 rounded-full blur-[120px]"
+      ></div>
+
+      <div class="w-full max-w-4xl grid md:grid-cols-12 gap-12 items-start relative z-10">
+        <!-- Editorial Side -->
+        <div class="md:col-span-5 pt-12">
+          <h1
+            class="font-headline text-5xl font-extrabold tracking-tight text-primary leading-tight mb-8"
+          >
+            Join the <span class="text-secondary">Sanctuary</span> of Care.
+          </h1>
+          <p class="text-lg text-on-surface-variant leading-relaxed mb-12 max-w-xs">
+            CuidarBem connects expert caregivers with families seeking a digital haven for
+            professional health management.
+          </p>
+          <div
+            class="bg-secondary-container/40 p-6 rounded-xl backdrop-blur-md border border-white/30"
+          >
+            <div class="flex items-center gap-3 mb-4">
+              <span
+                class="material-symbols-outlined text-primary"
+                style="font-variation-settings: 'FILL' 1"
+                >auto_awesome</span
+              >
+              <span class="font-headline font-bold text-primary">AI-Matched Care</span>
+            </div>
+            <p class="text-sm text-on-secondary-container/80 leading-snug">
+              Our platform uses intelligent observation to pair your specific specialties with the
+              families that need them most.
+            </p>
+          </div>
+        </div>
+
+        <!-- Registration Card -->
+        <div
+          class="md:col-span-7 bg-white/70 backdrop-blur-xl p-8 md:p-12 rounded-[2.5rem] border border-white/40 shadow-xl shadow-primary/5"
+        >
+          <form @submit.prevent="handleSubmit" class="space-y-10">
+            <!-- Section: Personal -->
+            <div class="space-y-6">
+              <div class="group">
+                <label
+                  class="block text-xs font-semibold uppercase tracking-widest text-on-surface-variant mb-2 ml-1"
+                  >Full Name</label
+                >
+                <input
+                  v-model="form.fullName"
+                  type="text"
+                  required
+                  class="w-full bg-transparent border-b border-outline-variant/30 focus:border-primary focus:ring-0 transition-all py-3 px-1 text-on-surface placeholder:text-outline-variant outline-none"
+                  placeholder="Elena Rodriguez"
+                />
+              </div>
+              <div class="grid grid-cols-2 gap-8">
+                <div class="group">
+                  <label
+                    class="block text-xs font-semibold uppercase tracking-widest text-on-surface-variant mb-2 ml-1"
+                    >Age</label
+                  >
+                  <input
+                    v-model="form.age"
+                    type="number"
+                    required
+                    class="w-full bg-transparent border-b border-outline-variant/30 focus:border-primary focus:ring-0 transition-all py-3 px-1 text-on-surface placeholder:text-outline-variant outline-none"
+                    placeholder="32"
+                  />
+                </div>
+                <div class="group">
+                  <label
+                    class="block text-xs font-semibold uppercase tracking-widest text-on-surface-variant mb-2 ml-1"
+                    >Gender</label
+                  >
+                  <select
+                    v-model="form.gender"
+                    class="w-full bg-transparent border-b border-outline-variant/30 focus:border-primary focus:ring-0 transition-all py-3 px-1 text-on-surface appearance-none outline-none"
+                  >
+                    <option disabled value="">Select</option>
+                    <option>Female</option>
+                    <option>Male</option>
+                    <option>Non-binary</option>
+                    <option>Prefer not to say</option>
+                  </select>
+                </div>
+              </div>
+              <div class="group">
+                <label
+                  class="block text-xs font-semibold uppercase tracking-widest text-on-surface-variant mb-2 ml-1"
+                  >Phone Number</label
+                >
+                <input
+                  v-model="form.phone"
+                  type="tel"
+                  required
+                  class="w-full bg-transparent border-b border-outline-variant/30 focus:border-primary focus:ring-0 transition-all py-3 px-1 text-on-surface placeholder:text-outline-variant outline-none"
+                  placeholder="+1 (555) 000-0000"
+                />
+              </div>
+            </div>
+
+            <!-- Section: Expertise -->
+            <div class="space-y-6 pt-4">
+              <div class="grid grid-cols-2 gap-8">
+                <div class="group">
+                  <label
+                    class="block text-xs font-semibold uppercase tracking-widest text-on-surface-variant mb-2 ml-1"
+                    >Specialty</label
+                  >
+                  <select
+                    v-model="form.specialty"
+                    required
+                    class="w-full bg-transparent border-b border-outline-variant/30 focus:border-primary focus:ring-0 transition-all py-3 px-1 text-on-surface appearance-none outline-none"
+                  >
+                    <option disabled value="">Specialty Area</option>
+                    <option v-for="s in specialties" :key="s" :value="s">{{ s }}</option>
+                  </select>
+                </div>
+                <div class="group">
+                  <label
+                    class="block text-xs font-semibold uppercase tracking-widest text-on-surface-variant mb-2 ml-1"
+                    >Experience (Years)</label
+                  >
+                  <input
+                    v-model="form.experience"
+                    type="text"
+                    required
+                    class="w-full bg-transparent border-b border-outline-variant/30 focus:border-primary focus:ring-0 transition-all py-3 px-1 text-on-surface placeholder:text-outline-variant outline-none"
+                    placeholder="5"
+                  />
+                </div>
+              </div>
+              <div class="group">
+                <label
+                  class="block text-xs font-semibold uppercase tracking-widest text-on-surface-variant mb-2 ml-1"
+                  >Professional Bio</label
+                >
+                <textarea
+                  v-model="form.bio"
+                  rows="3"
+                  required
+                  class="w-full bg-surface-container/30 border-none rounded-xl focus:ring-2 focus:ring-primary/20 transition-all p-4 text-on-surface placeholder:text-outline-variant resize-none outline-none"
+                  placeholder="Describe your care philosophy..."
+                ></textarea>
+              </div>
+
+              <!-- Profile Photo Upload -->
+              <div class="group">
+                <label
+                  class="block text-xs font-semibold uppercase tracking-widest text-on-surface-variant mb-2 ml-1"
+                  >Profile Photo</label
+                >
+                <input
+                  id="avatar-input"
+                  type="file"
+                  accept="image/*"
+                  class="hidden"
+                  @change="handleAvatarChange"
+                />
+                <label
+                  for="avatar-input"
+                  class="flex items-center gap-5 cursor-pointer group/upload"
+                >
+                  <!-- Preview / Placeholder -->
+                  <div
+                    class="w-20 h-20 rounded-2xl overflow-hidden flex-shrink-0 border-2 border-dashed border-outline-variant/40 bg-surface-container/30 flex items-center justify-center transition-all group-hover/upload:border-primary/50"
+                  >
+                    <img
+                      v-if="avatarPreview"
+                      :src="avatarPreview"
+                      alt="Preview"
+                      class="w-full h-full object-cover"
+                    />
+                    <span v-else class="material-symbols-outlined text-3xl text-outline/50"
+                      >add_a_photo</span
+                    >
+                  </div>
+                  <div>
+                    <p class="text-sm font-semibold text-on-surface">
+                      {{ avatarPreview ? 'Change photo' : 'Upload a photo' }}
+                    </p>
+                    <p class="text-xs text-outline mt-1">JPG, PNG or WEBP · Max 5 MB</p>
+                  </div>
+                </label>
+              </div>
+            </div>
+
+            <!-- Action -->
+            <button
+              type="submit"
+              :disabled="submitLoading"
+              class="w-full bg-gradient-to-br from-primary to-primary-container text-on-primary font-headline font-bold py-4 rounded-full shadow-lg shadow-primary/20 hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center justify-center gap-2 disabled:opacity-70"
+            >
+              <span v-if="submitLoading" class="material-symbols-outlined animate-spin"
+                >progress_activity</span
+              >
+              <span>{{ submitLoading ? 'Saving...' : 'Complete Registration' }}</span>
+              <span v-if="!submitLoading" class="material-symbols-outlined text-sm"
+                >arrow_forward</span
+              >
+            </button>
+          </form>
+        </div>
+      </div>
+    </main>
+
+    <!-- Footer -->
+    <footer
+      class="bg-transparent w-full max-w-7xl mx-auto px-8 flex flex-col md:flex-row justify-between items-center pb-12 pt-24 text-sm tracking-wide"
+    >
+      <div class="mb-6 md:mb-0">
+        <span class="font-headline font-black text-cyan-950 text-lg">CuidarBem</span>
+        <p class="text-cyan-800/50 mt-1">© 2026 CuidarBem. The Digital Sanctuary.</p>
+      </div>
+      <div class="flex gap-8">
+        <a
+          class="text-cyan-800/50 hover:text-cyan-950 transition-opacity opacity-80 hover:opacity-100"
+          href="#"
+          >Privacy Policy</a
+        >
+        <a
+          class="text-cyan-800/50 hover:text-cyan-950 transition-opacity opacity-80 hover:opacity-100"
+          href="#"
+          >Terms of Service</a
+        >
+        <a
+          class="text-cyan-800/50 hover:text-cyan-950 transition-opacity opacity-80 hover:opacity-100"
+          href="#"
+          >Contact Support</a
+        >
+      </div>
+    </footer>
   </div>
 </template>
 
 <style scoped>
 .material-symbols-outlined {
-  font-variation-settings: 'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 24;
+  font-variation-settings:
+    'FILL' 0,
+    'wght' 400,
+    'GRAD' 0,
+    'opsz' 24;
+}
+
+.floating-pill-nav {
+  background: rgba(255, 255, 255, 0.4);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(0, 96, 100, 0.1);
+}
+
+/* Chrome, Safari, Edge, Opera */
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  appearance: none;
+  margin: 0;
+}
+
+/* Firefox */
+input[type='number'] {
+  -moz-appearance: textfield;
 }
 </style>
