@@ -103,7 +103,7 @@ const statsVars = [
       </div>
     </nav>
 
-    <main class="pt-24">
+    <main class="pt-6">
       <!-- Hero Section -->
       <section class="relative min-h-[850px] flex items-center px-8 overflow-hidden bg-white">
         <div class="max-w-7xl mx-auto w-full grid grid-cols-1 lg:grid-cols-12 gap-16 items-center">
@@ -119,7 +119,7 @@ const statsVars = [
             >
               O futuro do <span class="text-primary">cuidado</span>, hoje.
             </h1>
-            <p class="text-lg text-on-surface-variant font-light leading-relaxed mb-12 max-w-lg">
+            <p class="text-on-surface-variant font-light leading-relaxed mb-12 max-w-lg">
               Plataforma que conecta cuidadores e pessoas que precisam de cuidados.
             </p>
             <!-- Hero CTAs -->

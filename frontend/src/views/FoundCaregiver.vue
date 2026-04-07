@@ -14,6 +14,7 @@ interface CarerProfile {
   gender: string
   price: string
   experience: string
+  location: string
   bio: string
   specialty: string
   avatarUrl: string | null
@@ -64,6 +65,7 @@ const fetchProfiles = async () => {
             gender: p.gender,
             price: `R$ ${p.price}/dia`,
             experience: p.experience,
+            location: p.location || 'Não informada',
             bio: p.bio,
             specialty: p.specialty,
             avatarUrl: p.avatar_url || null,
@@ -243,6 +245,12 @@ const goBack = () => {
                   </span>
                   {{ profile.gender }}
                 </span>
+              </div>
+              <div class="flex justify-between items-center">
+                <span class="text-on-surface-variant text-sm flex items-center gap-2">
+                  <span class="material-symbols-outlined text-[16px]">location_on</span> Localização
+                </span>
+                <span class="text-on-surface font-bold truncate max-w-[140px]" :title="profile.location">{{ profile.location }}</span>
               </div>
               <div
                 class="pt-4 mt-2 border-t border-outline-variant/20 flex justify-between items-center"

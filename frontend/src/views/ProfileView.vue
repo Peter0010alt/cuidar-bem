@@ -15,6 +15,7 @@ const carer = ref({
   gender: '',
   specialty: '',
   experience: '',
+  location: '',
   bio: '',
   rating: 5.0,
   reviews: 0,
@@ -61,6 +62,7 @@ const fetchCarerData = async () => {
         gender: data.gender || '',
         specialty: data.specialty || '',
         experience: data.experience || '',
+        location: data.location || '',
         bio: data.bio || '',
         rating: data.rating || 5.0,
         reviews: data.reviews || 0,
@@ -216,7 +218,7 @@ const goBack = () => {
               </li>
               <li class="flex items-center gap-3">
                 <span class="material-symbols-outlined opacity-60">location_on</span>
-                <span class="font-medium">Cidade: <span class="font-bold">São Paulo, SP</span></span>
+                <span class="font-medium">Localização: <span class="font-bold">{{ carer.location ? carer.location : 'Não informada' }}</span></span>
               </li>
             </ul>
           </div>

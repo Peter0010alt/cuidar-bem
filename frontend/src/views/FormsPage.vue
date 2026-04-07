@@ -16,11 +16,59 @@ const userName = computed(() => {
   return userEmail.value.split('@')[0]
 })
 
+interface StateObj {
+  name: string
+  state_code: string
+}
+
+interface CountryObj {
+  name: string
+  iso3: string
+  iso2: string
+  states: StateObj[]
+}
+
+const selectedCountry = ref('')
+const selectedState = ref('')
+const selectedCity = ref('')
+const countries = ref<CountryObj[]>([])
+const currentStates = ref<StateObj[]>([])
+const cities = ref<string[]>([])
+
+const onCountryChange = () => {
+  selectedState.value = ''
+  selectedCity.value = ''
+  cities.value = []
+  const countryObj = countries.value.find(c => c.name === selectedCountry.value)
+  currentStates.value = countryObj ? [...countryObj.states].sort((a, b) => a.name.localeCompare(b.name)) : []
+}
+
+const onStateChange = async () => {
+  selectedCity.value = ''
+  cities.value = []
+  if (!selectedCountry.value || !selectedState.value) return
+  
+  try {
+    const res = await fetch("https://countriesnow.space/api/v0.1/countries/state/cities", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ country: selectedCountry.value, state: selectedState.value })
+    })
+    const data = await res.json()
+    if (!data.error) {
+      cities.value = data.data.sort((a: string, b: string) => a.localeCompare(b))
+    }
+  } catch (error) {
+    console.error("Error fetching cities:", error)
+  }
+}
+
 const form = ref({
   fullName: '',
   gender: '',
   age: '',
   phone: '',
+  location: '',
   specialty: '',
   experience: '',
   bio: '',
@@ -42,6 +90,17 @@ const handleSignOut = async () => {
 }
 
 onMounted(async () => {
+  // Load countries API
+  try {
+    const resp = await fetch("https://countriesnow.space/api/v0.1/countries/states")
+    const apiData = await resp.json()
+    if (!apiData.error) {
+      countries.value = apiData.data.sort((a: CountryObj, b: CountryObj) => a.name.localeCompare(b.name))
+    }
+  } catch (error) {
+    console.error("Error fetching countries:", error)
+  }
+
   // getUser() validates the token server-side — required for RLS to work correctly
   const {
     data: { user },
@@ -62,12 +121,43 @@ onMounted(async () => {
       gender: carer.gender || '',
       age: carer.age?.toString() || '',
       phone: carer.phone || '',
+      location: carer.location || '',
       specialty: carer.specialty || '',
       experience: carer.experience || '',
       bio: carer.bio || '',
       avatarUrl: carer.avatar_url || '',
     }
     if (carer.avatar_url) avatarPreview.value = carer.avatar_url
+
+    // Pre-fill location fields
+    if (carer.location && carer.location.includes(' - ')) {
+      const parts = carer.location.split(' - ')
+      selectedCountry.value = parts[1]
+      const cityState = parts[0].split(', ')
+      selectedCity.value = cityState[0]
+      selectedState.value = cityState[1] || ''
+      
+      const cObj = countries.value.find(c => c.name === selectedCountry.value)
+      if (cObj) {
+        currentStates.value = [...cObj.states].sort((a, b) => a.name.localeCompare(b.name))
+      }
+      
+      if (selectedState.value) {
+         try {
+           const cres = await fetch("https://countriesnow.space/api/v0.1/countries/state/cities", {
+             method: "POST",
+             headers: { "Content-Type": "application/json" },
+             body: JSON.stringify({ country: selectedCountry.value, state: selectedState.value })
+           })
+           const cData = await cres.json()
+           if (!cData.error) {
+             cities.value = cData.data.sort((a: string, b: string) => a.localeCompare(b))
+           }
+         } catch(e) { console.error("Prefill cities error", e) }
+      }
+    } else {
+      form.value.location = carer.location || ''
+    }
   }
 })
 
@@ -114,12 +204,17 @@ const handleSubmit = async () => {
       console.log('Image uploaded successfully. Public URL:', avatarUrl)
     }
 
+    const finalLocation = selectedCity.value && selectedState.value && selectedCountry.value 
+      ? `${selectedCity.value}, ${selectedState.value} - ${selectedCountry.value}`
+      : form.value.location
+
     const payload = {
       id: userId.value,
       full_name: form.value.fullName,
       gender: form.value.gender,
       age: parseInt(form.value.age),
       phone: form.value.phone,
+      location: finalLocation,
       specialty: form.value.specialty,
       experience: form.value.experience,
       bio: form.value.bio,
@@ -328,6 +423,25 @@ const handleSubmit = async () => {
                   class="w-full bg-transparent border-b border-outline-variant/30 focus:border-primary focus:ring-0 transition-all py-3 px-1 text-on-surface placeholder:text-outline-variant outline-none"
                   placeholder="+1 (555) 000-0000"
                 />
+              </div>
+
+              <!-- Location API Section -->
+              <div class="space-y-4 pt-2">
+                <label class="block text-xs font-semibold uppercase tracking-widest text-on-surface-variant ml-1">Localização</label>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                  <select v-model="selectedCountry" @change="onCountryChange" required class="w-full bg-transparent border-b border-outline-variant/30 focus:border-primary focus:ring-0 transition-all py-3 px-1 text-on-surface appearance-none outline-none">
+                    <option disabled value="">País</option>
+                    <option v-for="c in countries" :key="c.name" :value="c.name">{{ c.name }}</option>
+                  </select>
+                  <select v-model="selectedState" @change="onStateChange" :disabled="!selectedCountry" required class="w-full bg-transparent border-b border-outline-variant/30 focus:border-primary focus:ring-0 transition-all py-3 px-1 text-on-surface appearance-none outline-none disabled:opacity-50">
+                    <option disabled value="">Estado</option>
+                    <option v-for="s in currentStates" :key="s.name" :value="s.name">{{ s.name }}</option>
+                  </select>
+                  <select v-model="selectedCity" :disabled="!selectedState" required class="w-full bg-transparent border-b border-outline-variant/30 focus:border-primary focus:ring-0 transition-all py-3 px-1 text-on-surface appearance-none outline-none disabled:opacity-50">
+                    <option disabled value="">Cidade</option>
+                    <option v-for="city in cities" :key="city" :value="city">{{ city }}</option>
+                  </select>
+                </div>
               </div>
             </div>
 
