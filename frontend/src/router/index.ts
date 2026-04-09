@@ -6,12 +6,12 @@ const requireAuth = async () => {
   const {
     data: { session },
   } = await supabase.auth.getSession()
-  
+
   if (!session) {
     console.warn('Navigation blocked: No session found. Redirecting to login.')
     return { name: 'login' }
   }
-  
+
   console.log('Navigation authorized for user:', session.user.id)
 }
 

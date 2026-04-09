@@ -36,7 +36,7 @@ const fetchProfiles = async () => {
       console.error('FoundCaregiver fetch error:', error)
       throw error
     }
-    
+
     console.log('Fetched carers data:', data)
     if (data && data.length === 0) {
       console.warn('No carers found. Check RLS SELECT policies on the "carers" table!')
@@ -87,8 +87,8 @@ onMounted(fetchProfiles)
 const filteredProfiles = computed(() => {
   if (!searchQuery.value) return profiles.value
   const query = searchQuery.value.toLowerCase()
-  return profiles.value.filter((p) => 
-    p.name.toLowerCase().includes(query) || 
+  return profiles.value.filter((p) =>
+    p.name.toLowerCase().includes(query) ||
     p.specialty.toLowerCase().includes(query)
   )
 })
@@ -188,11 +188,11 @@ const goBack = () => {
               v-if="profile.avatarUrl"
               class="w-20 h-20 rounded-2xl overflow-hidden flex-shrink-0 shadow-sm"
             >
-              <img 
-                :src="profile.avatarUrl" 
-                :alt="profile.name" 
+              <img
+                :src="profile.avatarUrl"
+                :alt="profile.name"
                 class="w-full h-full object-cover"
-                @error="profile.avatarUrl = null" 
+                @error="profile.avatarUrl = null"
               />
             </div>
             <div
@@ -216,7 +216,7 @@ const goBack = () => {
               <p
                 class="text-xs font-semibold text-primary uppercase tracking-widest bg-secondary-container px-3 py-1 rounded-full w-fit"
               >
-                {{ profile.experience }} exp.
+                {{ profile.experience }} ano(s) exp.
               </p>
             </div>
           </div>

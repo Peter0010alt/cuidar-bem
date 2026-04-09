@@ -2,6 +2,8 @@
 import { ref, onMounted, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { supabase } from '@/lib/supabaseClient'
+import MazInputPhoneNumber from 'maz-ui/components/MazInputPhoneNumber'
+import 'maz-ui/styles'
 
 const router = useRouter()
 const submitLoading = ref(false)
@@ -47,7 +49,7 @@ const onStateChange = async () => {
   selectedCity.value = ''
   cities.value = []
   if (!selectedCountry.value || !selectedState.value) return
-  
+
   try {
     const res = await fetch("https://countriesnow.space/api/v0.1/countries/state/cities", {
       method: "POST",
@@ -136,12 +138,12 @@ onMounted(async () => {
       const cityState = parts[0].split(', ')
       selectedCity.value = cityState[0]
       selectedState.value = cityState[1] || ''
-      
+
       const cObj = countries.value.find(c => c.name === selectedCountry.value)
       if (cObj) {
         currentStates.value = [...cObj.states].sort((a, b) => a.name.localeCompare(b.name))
       }
-      
+
       if (selectedState.value) {
          try {
            const cres = await fetch("https://countriesnow.space/api/v0.1/countries/state/cities", {
@@ -198,13 +200,13 @@ const handleSubmit = async () => {
         .from('avatars')
         .upload(path, avatarFile.value, { upsert: true })
       if (uploadError) throw uploadError
-      
+
       const { data: urlData } = supabase.storage.from('avatars').getPublicUrl(path)
       avatarUrl = urlData.publicUrl
       console.log('Image uploaded successfully. Public URL:', avatarUrl)
     }
 
-    const finalLocation = selectedCity.value && selectedState.value && selectedCountry.value 
+    const finalLocation = selectedCity.value && selectedState.value && selectedCountry.value
       ? `${selectedCity.value}, ${selectedState.value} - ${selectedCountry.value}`
       : form.value.location
 
@@ -416,12 +418,11 @@ const handleSubmit = async () => {
                   class="block text-xs font-semibold uppercase tracking-widest text-on-surface-variant mb-2 ml-1"
                   >Phone Number</label
                 >
-                <input
+                <MazInputPhoneNumber
                   v-model="form.phone"
-                  type="tel"
+                  default-country-code="BR"
                   required
-                  class="w-full bg-transparent border-b border-outline-variant/30 focus:border-primary focus:ring-0 transition-all py-3 px-1 text-on-surface placeholder:text-outline-variant outline-none"
-                  placeholder="+1 (555) 000-0000"
+                  class="w-full"
                 />
               </div>
 
@@ -606,5 +607,29 @@ input::-webkit-inner-spin-button {
 /* Firefox */
 input[type='number'] {
   -moz-appearance: textfield;
+}
+
+/* MazPhoneNumberInput Override to match aesthetic */
+:deep(.m-input-phone-number) {
+  --maz-border-radius: 0;
+  --maz-border-width: 0 0 1px 0;
+}
+
+:deep(.m-input-wrapper) {
+  border: none !important;
+  border-bottom: 1px solid rgba(120, 130, 130, 0.3) !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  background-color: transparent !important;
+}
+
+:deep(.m-input-wrapper.is-focused) {
+  border-bottom-color: #006064 !important;
+}
+
+:deep(.m-input-input) {
+  padding-left: 0.25rem !important;
+  padding-right: 0.25rem !important;
+  color: inherit !important;
 }
 </style>

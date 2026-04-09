@@ -48,7 +48,6 @@ const fetchCarerData = async () => {
 
     if (error) {
       if (error.code === 'PGRST116') {
-        // No carer profile yet
         router.push({ name: 'forms-page' })
         return
       }
@@ -80,7 +79,7 @@ const fetchCarerData = async () => {
 
 const handleUpdatePrice = async () => {
   if (!userId.value) return
-  
+
   saving.value = true
   try {
     const session = await supabase.auth.getSession()
@@ -183,7 +182,7 @@ const goBack = () => {
                 <span class="font-bold text-teal-900">{{ carer.rating }}</span>
                 <span class="text-on-surface-variant text-sm">({{ carer.reviews }} avaliações)</span>
               </div>
-              
+
               <p class="text-primary font-bold bg-primary-fixed/30 px-4 py-1.5 rounded-full text-xs uppercase tracking-widest mb-8">
                 {{ carer.specialty }}
               </p>
@@ -237,7 +236,7 @@ const goBack = () => {
           <!-- Pricing & Range Slider -->
           <div class="bg-white/60 backdrop-blur-3xl p-10 rounded-[3rem] shadow-2xl shadow-primary/5 border border-white/60 relative overflow-hidden">
             <h2 class="text-2xl font-bold text-teal-900 font-headline mb-8">Ajuste seu Preço</h2>
-            
+
             <div class="space-y-12">
               <div class="relative pt-6">
                 <!-- Custom Slider -->
@@ -248,14 +247,14 @@ const goBack = () => {
                   v-model="priceRange"
                   class="w-full h-3 bg-surface-container rounded-full appearance-none cursor-pointer accent-primary focus:outline-none transition-all"
                 />
-                
+
                 <div class="flex justify-between mt-4 text-xs font-bold text-on-surface-variant tracking-widest uppercase">
                   <span>R$ 50</span>
                   <span>R$ 500+</span>
                 </div>
 
                 <!-- Price Tooltip/Display -->
-                <div 
+                <div
                   class="absolute top-[-30px] left-0 right-0 flex justify-center pointer-events-none"
                 >
                   <div class="bg-primary text-white px-6 py-2 rounded-2xl font-extrabold text-xl shadow-lg shadow-primary/20 flex items-center gap-2">
@@ -268,7 +267,7 @@ const goBack = () => {
                 * O valor da sua diária será exibido para as famílias que buscam por cuidados no santuário.
               </div>
 
-              <button 
+              <button
                 @click="handleUpdatePrice"
                 :disabled="saving"
                 class="w-full py-5 rounded-full bg-primary text-white font-extrabold text-lg shadow-xl shadow-primary/20 hover:bg-primary-container hover:-translate-y-1 transition-all flex items-center justify-center gap-3 disabled:opacity-70"
