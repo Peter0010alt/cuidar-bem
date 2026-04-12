@@ -338,11 +338,11 @@ const handleSubmit = async () => {
           <h1
             class="font-headline text-5xl font-extrabold tracking-tight text-primary leading-tight mb-8"
           >
-            Join the <span class="text-secondary">Sanctuary</span> of Care.
+            Junte-se ao  <span class="text-secondary">Carinho</span> de cuidar.
           </h1>
           <p class="text-lg text-on-surface-variant leading-relaxed mb-12 max-w-xs">
-            CuidarBem connects expert caregivers with families seeking a digital haven for
-            professional health management.
+            CuidarBem conecta cuidadores especializados com famílias que buscam um ambiente digital 
+            seguro para gerenciamento profissional de saúde.
           </p>
           <div
             class="bg-secondary-container/40 p-6 rounded-xl backdrop-blur-md border border-white/30"
@@ -353,11 +353,12 @@ const handleSubmit = async () => {
                 style="font-variation-settings: 'FILL' 1"
                 >auto_awesome</span
               >
-              <span class="font-headline font-bold text-primary">AI-Matched Care</span>
+              <span class="font-headline font-bold text-primary">Dica</span>
             </div>
             <p class="text-sm text-on-secondary-container/80 leading-snug">
-              Our platform uses intelligent observation to pair your specific specialties with the
-              families that need them most.
+              
+              Quanto mais informações você fornecer, mais suas chances de ser contratado.
+
             </p>
           </div>
         </div>
@@ -372,7 +373,7 @@ const handleSubmit = async () => {
               <div class="group">
                 <label
                   class="block text-xs font-semibold uppercase tracking-widest text-on-surface-variant mb-2 ml-1"
-                  >Full Name</label
+                  >Nome completo</label
                 >
                 <input
                   v-model="form.fullName"
@@ -386,7 +387,7 @@ const handleSubmit = async () => {
                 <div class="group">
                   <label
                     class="block text-xs font-semibold uppercase tracking-widest text-on-surface-variant mb-2 ml-1"
-                    >Age</label
+                    >Idade</label
                   >
                   <input
                     v-model="form.age"
@@ -399,24 +400,24 @@ const handleSubmit = async () => {
                 <div class="group">
                   <label
                     class="block text-xs font-semibold uppercase tracking-widest text-on-surface-variant mb-2 ml-1"
-                    >Gender</label
+                    >Sexo</label
                   >
                   <select
                     v-model="form.gender"
                     class="w-full bg-transparent border-b border-outline-variant/30 focus:border-primary focus:ring-0 transition-all py-3 px-1 text-on-surface appearance-none outline-none"
                   >
-                    <option disabled value="">Select</option>
-                    <option>Female</option>
-                    <option>Male</option>
-                    <option>Non-binary</option>
-                    <option>Prefer not to say</option>
+                    <option disabled value="">Selecione</option>
+                    <option>Feminino</option>
+                    <option>Masculino</option>
+                    <option>Não binário</option>
+                    <option>Prefiro não informar</option>
                   </select>
                 </div>
               </div>
               <div class="group">
                 <label
                   class="block text-xs font-semibold uppercase tracking-widest text-on-surface-variant mb-2 ml-1"
-                  >Phone Number</label
+                  >Número de telefone</label
                 >
                 <MazInputPhoneNumber
                   v-model="form.phone"
@@ -452,21 +453,21 @@ const handleSubmit = async () => {
                 <div class="group">
                   <label
                     class="block text-xs font-semibold uppercase tracking-widest text-on-surface-variant mb-2 ml-1"
-                    >Specialty</label
+                    >Área de especialização</label
                   >
                   <select
                     v-model="form.specialty"
                     required
                     class="w-full bg-transparent border-b border-outline-variant/30 focus:border-primary focus:ring-0 transition-all py-3 px-1 text-on-surface appearance-none outline-none"
                   >
-                    <option disabled value="">Specialty Area</option>
+                    <option disabled value="">Área de especialização</option>
                     <option v-for="s in specialties" :key="s" :value="s">{{ s }}</option>
                   </select>
                 </div>
                 <div class="group">
                   <label
                     class="block text-xs font-semibold uppercase tracking-widest text-on-surface-variant mb-2 ml-1"
-                    >Experience (Years)</label
+                    >Experiência (Anos)</label
                   >
                   <input
                     v-model="form.experience"
@@ -480,14 +481,14 @@ const handleSubmit = async () => {
               <div class="group">
                 <label
                   class="block text-xs font-semibold uppercase tracking-widest text-on-surface-variant mb-2 ml-1"
-                  >Professional Bio</label
+                  >Biografia profissional</label
                 >
                 <textarea
                   v-model="form.bio"
                   rows="3"
                   required
                   class="w-full bg-surface-container/30 border-none rounded-xl focus:ring-2 focus:ring-primary/20 transition-all p-4 text-on-surface placeholder:text-outline-variant resize-none outline-none"
-                  placeholder="Describe your care philosophy..."
+                  placeholder="Descreva suas experiências profissionais, cursos realizados, e o que te torna um cuidador especial..."
                 ></textarea>
               </div>
 
@@ -495,7 +496,7 @@ const handleSubmit = async () => {
               <div class="group">
                 <label
                   class="block text-xs font-semibold uppercase tracking-widest text-on-surface-variant mb-2 ml-1"
-                  >Profile Photo</label
+                  >Foto de perfil</label
                 >
                 <input
                   id="avatar-input"
@@ -524,9 +525,9 @@ const handleSubmit = async () => {
                   </div>
                   <div>
                     <p class="text-sm font-semibold text-on-surface">
-                      {{ avatarPreview ? 'Change photo' : 'Upload a photo' }}
+                      {{ avatarPreview ? 'Change photo' : 'Anexe uma foto' }}
                     </p>
-                    <p class="text-xs text-outline mt-1">JPG, PNG or WEBP · Max 5 MB</p>
+                    <p class="text-xs text-outline mt-1">JPG, PNG ou WEBP · Max 5 MB</p>
                   </div>
                 </label>
               </div>
@@ -541,7 +542,7 @@ const handleSubmit = async () => {
               <span v-if="submitLoading" class="material-symbols-outlined animate-spin"
                 >progress_activity</span
               >
-              <span>{{ submitLoading ? 'Saving...' : 'Complete Registration' }}</span>
+              <span>{{ submitLoading ? 'Saving...' : 'Completar registro' }}</span>
               <span v-if="!submitLoading" class="material-symbols-outlined text-sm"
                 >arrow_forward</span
               >
